@@ -182,9 +182,22 @@ void IDatabase::renameTable(
 void IDatabase::alterTable(
     ContextPtr /*context*/,
     const StorageID & /*table_id*/,
-    const StorageInMemoryMetadata & /*metadata*/)
+    const StorageInMemoryMetadata & /*metadata*/,
+    ASTPtr& /*ast*/)
 {
     throw Exception(ErrorCodes::NOT_IMPLEMENTED, "{}: alterTable() is not supported", getEngineName());
+}
+
+ASTPtr IDatabase::getAttachTableQuery(ContextPtr local_context, const StorageID & table_id) const
+{
+    auto ast = getCreateTableQuery(table_id.table_name, local_context)->clone();
+    auto * create_ast = ast->as<ASTCreateQuery>();
+    if (create_ast == nullptr)
+    {
+        throw Exception(ErrorCodes::NOT_IMPLEMENTED, "{}: getAttachTableQuery() is not supported", getEngineName());
+    }
+    create_ast->attach = true;
+    return ast;
 }
 
 void IDatabase::renameDatabase(ContextPtr, const String & /*new_name*/)

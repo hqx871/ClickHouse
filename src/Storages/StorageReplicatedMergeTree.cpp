@@ -1695,7 +1695,8 @@ void StorageReplicatedMergeTree::setTableStructure(const StorageID & table_id, c
 
     try
     {
-        DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata);
+        auto attach_ast = DatabaseCatalog::instance().getDatabase(table_id.database_name)->getAttachTableQuery(local_context, table_id);
+        DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata, attach_ast);
     }
     catch (...)
     {
@@ -6507,7 +6508,7 @@ PartitionBlockNumbersHolder StorageReplicatedMergeTree::allocateBlockNumbersInAf
 
 
 void StorageReplicatedMergeTree::alter(
-    const AlterCommands & commands, ContextPtr query_context, AlterLockHolder & table_lock_holder)
+    const AlterCommands & commands, ContextPtr query_context, AlterLockHolder & table_lock_holder, ASTPtr& attach_ast)
 {
     assertNotReadonly();
 
@@ -6515,7 +6516,7 @@ void StorageReplicatedMergeTree::alter(
     const auto & query_settings = query_context->getSettingsRef();
 
     StorageInMemoryMetadata future_metadata = getInMemoryMetadata();
-    commands.apply(future_metadata, query_context);
+    commands.apply(future_metadata, attach_ast, query_context);
 
     if (commands.isSettingsAlter())
     {
@@ -6526,7 +6527,7 @@ void StorageReplicatedMergeTree::alter(
         changeSettings(future_metadata.settings_changes, table_lock_holder);
 
         /// It is safe to ignore exceptions here as only settings are changed, which is not validated in `alterTable`
-        DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(query_context, table_id, future_metadata);
+        DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(query_context, table_id, future_metadata, attach_ast);
         return;
     }
 
@@ -6535,7 +6536,7 @@ void StorageReplicatedMergeTree::alter(
         setInMemoryMetadata(future_metadata);
 
         /// It is safe to ignore exceptions here as only the comment is changed, which is not validated in `alterTable`
-        DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(query_context, table_id, future_metadata);
+        DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(query_context, table_id, future_metadata, attach_ast);
         return;
     }
 
@@ -6664,7 +6665,7 @@ void StorageReplicatedMergeTree::alter(
 
             /// Only the comment and/or settings changed here, so it is okay to assume alterTable won't throw as neither
             /// of them are validated in alterTable.
-            DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(query_context, table_id, metadata_copy);
+            DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(query_context, table_id, metadata_copy, attach_ast);
         }
 
         /// We can be sure, that in case of successful commit in zookeeper our
@@ -6679,7 +6680,7 @@ void StorageReplicatedMergeTree::alter(
         alter_entry->create_time = time(nullptr);
 
         auto maybe_mutation_commands
-            = commands.getMutationCommands(*current_metadata, query_settings[Setting::materialize_ttl_after_modify], query_context);
+            = commands.getMutationCommands(*current_metadata, attach_ast, query_settings[Setting::materialize_ttl_after_modify], query_context);
 
         bool have_mutation = !maybe_mutation_commands.empty();
         alter_entry->have_mutation = have_mutation;

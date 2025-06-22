@@ -140,9 +140,9 @@ public:
         bool cleanup,
         ContextPtr context) override;
 
-    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & table_lock_holder) override;
+    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & table_lock_holder, ASTPtr& ast) override;
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context, ASTPtr& ast) const override;
 
     void startup() override;
     void shutdown(bool is_drop) override;

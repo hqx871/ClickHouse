@@ -818,7 +818,7 @@ public:
     /// - all type conversions can be done.
     /// - columns corresponding to primary key, indices, sign, sampling expression and date are not affected.
     /// If something is wrong, throws an exception.
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context, ASTPtr& ast) const override;
 
     /// Throw exception if command is some kind of DROP command (drop column, drop index, etc)
     /// and we have unfinished mutation which need this column to finish.

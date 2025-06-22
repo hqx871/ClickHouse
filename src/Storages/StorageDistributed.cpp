@@ -1386,7 +1386,7 @@ std::optional<QueryPipeline> StorageDistributed::distributedWrite(const ASTInser
 }
 
 
-void StorageDistributed::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context) const
+void StorageDistributed::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context, ASTPtr&) const
 {
     std::optional<NameDependencies> name_deps{};
     for (const auto & command : commands)
@@ -1413,14 +1413,14 @@ void StorageDistributed::checkAlterIsPossible(const AlterCommands & commands, Co
     }
 }
 
-void StorageDistributed::alter(const AlterCommands & params, ContextPtr local_context, AlterLockHolder &)
+void StorageDistributed::alter(const AlterCommands & params, ContextPtr local_context, AlterLockHolder &, ASTPtr& ast)
 {
     auto table_id = getStorageID();
 
-    checkAlterIsPossible(params, local_context);
+    checkAlterIsPossible(params, local_context, ast);
     StorageInMemoryMetadata new_metadata = getInMemoryMetadata();
-    params.apply(new_metadata, local_context);
-    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata);
+    params.apply(new_metadata, ast, local_context);
+    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata, ast);
     setInMemoryMetadata(new_metadata);
 }
 

@@ -54,6 +54,8 @@ BlockIO InterpreterDropIndexQuery::execute()
     if (table->isStaticStorage())
         throw Exception(ErrorCodes::TABLE_IS_READ_ONLY, "Table is read-only");
 
+    auto ast = database->getAttachTableQuery(getContext(), table_id);
+
     /// Convert ASTDropIndexQuery to AlterCommand.
     AlterCommands alter_commands;
 
@@ -69,8 +71,8 @@ BlockIO InterpreterDropIndexQuery::execute()
     StorageInMemoryMetadata metadata = table->getInMemoryMetadata();
     alter_commands.validate(table, current_context);
     alter_commands.prepare(metadata);
-    table->checkAlterIsPossible(alter_commands, current_context);
-    table->alter(alter_commands, current_context, alter_lock);
+    table->checkAlterIsPossible(alter_commands, current_context, ast);
+    table->alter(alter_commands, current_context, alter_lock, ast);
 
     return {};
 }

@@ -139,7 +139,22 @@ void DatabaseMemory::drop(ContextPtr local_context)
     removeDataPath(local_context);
 }
 
-void DatabaseMemory::alterTable(ContextPtr local_context, const StorageID & table_id, const StorageInMemoryMetadata & metadata)
+ASTPtr DatabaseMemory::getAttachTableQuery(ContextPtr /*local_context*/, const StorageID & table_id) const
+{
+    /// NOTE: It is safe to modify AST without lock since alterTable() is called under IStorage::lockForShare()
+    ASTPtr create_query;
+    {
+        std::lock_guard lock{mutex};
+        auto it = create_queries.find(table_id.table_name);
+        if (it == create_queries.end() || !it->second)
+            throw Exception(ErrorCodes::UNKNOWN_TABLE, "Cannot alter: There is no metadata of table {}", table_id.getNameForLogs());
+        create_query = it->second;
+    }
+    return create_query;
+}
+
+
+void DatabaseMemory::alterTable(ContextPtr local_context, const StorageID & table_id, const StorageInMemoryMetadata & metadata, ASTPtr& /*ast*/)
 {
     /// NOTE: It is safe to modify AST without lock since alterTable() is called under IStorage::lockForShare()
     ASTPtr create_query;

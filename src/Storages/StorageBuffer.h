@@ -111,10 +111,10 @@ public:
     bool supportsPrewhere() const override;
     bool supportsFinal() const override { return true; }
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context, ASTPtr& ast) const override;
 
     /// The structure of the subordinate table is not checked and does not change.
-    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & table_lock_holder) override;
+    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & table_lock_holder, ASTPtr& ast) override;
 
     std::optional<UInt64> totalRows(ContextPtr query_context) const override;
     std::optional<UInt64> totalBytes(ContextPtr query_context) const override;

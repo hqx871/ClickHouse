@@ -335,7 +335,10 @@ public:
     virtual void alterTable(
         ContextPtr /*context*/,
         const StorageID & /*table_id*/,
-        const StorageInMemoryMetadata & /*metadata*/);
+        const StorageInMemoryMetadata & /*metadata*/,
+        ASTPtr& /*ast*/);
+
+    virtual ASTPtr getAttachTableQuery(ContextPtr /*local_context*/, const StorageID & /*table_id*/) const;
 
     /// Special method for ReplicatedMergeTree and DatabaseReplicated
     virtual bool canExecuteReplicatedMetadataAlter() const { return true; }

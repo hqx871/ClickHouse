@@ -7,6 +7,7 @@
 #include <Storages/MutationCommands.h>
 #include <Storages/ColumnsDescription.h>
 #include <Common/SettingsChanges.h>
+#include "Parsers/ASTCreateQuery.h"
 
 
 namespace DB
@@ -167,7 +168,7 @@ struct AlterCommand
 
     static std::optional<AlterCommand> parse(const ASTAlterCommand * command);
 
-    void apply(StorageInMemoryMetadata & metadata, ContextPtr context) const;
+    void apply(StorageInMemoryMetadata & metadata, ASTPtr& attach_query, ContextPtr context) const;
 
     /// Check that alter command require data modification (mutation) to be
     /// executed. For example, cast from Date to UInt16 type can be executed
@@ -192,7 +193,7 @@ struct AlterCommand
     /// If possible, convert alter command to mutation command. In other case
     /// return empty optional. Some storages may execute mutations after
     /// metadata changes.
-    std::optional<MutationCommand> tryConvertToMutationCommand(StorageInMemoryMetadata & metadata, ContextPtr context) const;
+    std::optional<MutationCommand> tryConvertToMutationCommand(StorageInMemoryMetadata & metadata, ASTPtr& attach_query, ContextPtr context) const;
 };
 
 class Context;
@@ -216,7 +217,7 @@ public:
 
     /// Apply all alter command in sequential order to storage metadata.
     /// Commands have to be prepared before apply.
-    void apply(StorageInMemoryMetadata & metadata, ContextPtr context) const;
+    void apply(StorageInMemoryMetadata & metadata, ASTPtr& attach_query, ContextPtr context) const;
 
     /// At least one command modify settings or comments.
     bool hasNonReplicatedAlterCommand() const;
@@ -234,7 +235,7 @@ public:
     /// alter. If alter can be performed as pure metadata update, than result is
     /// empty. If some TTL changes happened than, depending on materialize_ttl
     /// additional mutation command (MATERIALIZE_TTL) will be returned.
-    MutationCommands getMutationCommands(StorageInMemoryMetadata metadata, bool materialize_ttl, ContextPtr context, bool with_alters=false) const;
+    MutationCommands getMutationCommands(StorageInMemoryMetadata metadata, ASTPtr& attach_query, bool materialize_ttl, ContextPtr context, bool with_alters=false) const;
 
     /// Check if commands have a text index
     static bool hasTextIndex(const StorageInMemoryMetadata & metadata);

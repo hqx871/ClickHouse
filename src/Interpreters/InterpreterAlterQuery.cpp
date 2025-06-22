@@ -209,12 +209,13 @@ BlockIO InterpreterAlterQuery::executeToTable(const ASTAlterQuery & alter)
 
     if (!alter_commands.empty())
     {
+        auto ast = database->getAttachTableQuery(getContext(), table_id);
         auto alter_lock = table->lockForAlter(getContext()->getSettingsRef()[Setting::lock_acquire_timeout]);
         StorageInMemoryMetadata metadata = table->getInMemoryMetadata();
         alter_commands.validate(table, getContext());
         alter_commands.prepare(metadata);
-        table->checkAlterIsPossible(alter_commands, getContext());
-        table->alter(alter_commands, getContext(), alter_lock);
+        table->checkAlterIsPossible(alter_commands, getContext(), ast);
+        table->alter(alter_commands, getContext(), alter_lock, ast);
     }
 
     /// Get newest metadata_snapshot after execute ALTER command, in order to

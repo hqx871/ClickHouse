@@ -1475,7 +1475,7 @@ StorageMerge::DatabaseTablesIterators StorageMerge::DatabaseNameOrRegexp::getDat
 }
 
 
-void StorageMerge::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context) const
+void StorageMerge::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context, ASTPtr&) const
 {
     std::optional<NameDependencies> name_deps{};
     for (const auto & command : commands)
@@ -1502,13 +1502,13 @@ void StorageMerge::checkAlterIsPossible(const AlterCommands & commands, ContextP
 }
 
 void StorageMerge::alter(
-    const AlterCommands & params, ContextPtr local_context, AlterLockHolder &)
+    const AlterCommands & params, ContextPtr local_context, AlterLockHolder &, ASTPtr& ast)
 {
     auto table_id = getStorageID();
 
     StorageInMemoryMetadata storage_metadata = getInMemoryMetadata();
-    params.apply(storage_metadata, local_context);
-    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, storage_metadata);
+    params.apply(storage_metadata, ast, local_context);
+    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, storage_metadata, ast);
     setInMemoryMetadata(storage_metadata);
     setVirtuals(createVirtuals());
 }

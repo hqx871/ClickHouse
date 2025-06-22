@@ -487,7 +487,7 @@ public:
     /** ALTER tables in the form of column changes that do not affect the change
       * to Storage or its parameters. Executes under alter lock (lockForAlter).
       */
-    virtual void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & alter_lock_holder);
+    virtual void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & alter_lock_holder, ASTPtr& ast);
 
     /// Updates metadata that can be changed by other processes
     /// Return true if external metadata exists and was updated.
@@ -496,7 +496,7 @@ public:
     /** Checks that alter commands can be applied to storage. For example, columns can be modified,
       * or primary key can be changes, etc.
       */
-    virtual void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context) const;
+    virtual void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context, ASTPtr& ast) const;
 
     /**
       * Checks that mutation commands can be applied to storage.

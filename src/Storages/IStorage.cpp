@@ -229,16 +229,16 @@ Pipe IStorage::alterPartition(
     throw Exception(ErrorCodes::NOT_IMPLEMENTED, "Partition operations are not supported by storage {}", getName());
 }
 
-void IStorage::alter(const AlterCommands & params, ContextPtr context, AlterLockHolder &)
+void IStorage::alter(const AlterCommands & params, ContextPtr context, AlterLockHolder &, ASTPtr& ast)
 {
     auto table_id = getStorageID();
     StorageInMemoryMetadata new_metadata = getInMemoryMetadata();
-    params.apply(new_metadata, context);
-    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(context, table_id, new_metadata);
+    params.apply(new_metadata, ast, context);
+    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(context, table_id, new_metadata, ast);
     setInMemoryMetadata(new_metadata);
 }
 
-void IStorage::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */) const
+void IStorage::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */, ASTPtr&) const
 {
     for (const auto & command : commands)
     {

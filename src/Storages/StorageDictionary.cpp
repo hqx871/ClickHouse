@@ -295,7 +295,7 @@ void StorageDictionary::renameInMemory(const StorageID & new_table_id)
     dictionary_name = new_table_id.getFullNameNotQuoted();
 }
 
-void StorageDictionary::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */) const
+void StorageDictionary::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */, ASTPtr&) const
 {
     for (const auto & command : commands)
     {
@@ -305,9 +305,9 @@ void StorageDictionary::checkAlterIsPossible(const AlterCommands & commands, Con
     }
 }
 
-void StorageDictionary::alter(const AlterCommands & params, ContextPtr alter_context, AlterLockHolder & lock_holder)
+void StorageDictionary::alter(const AlterCommands & params, ContextPtr alter_context, AlterLockHolder & lock_holder, ASTPtr& ast)
 {
-    IStorage::alter(params, alter_context, lock_holder);
+    IStorage::alter(params, alter_context, lock_holder, ast);
 
     if (location == Location::Custom)
         return;

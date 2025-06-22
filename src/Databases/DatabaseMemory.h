@@ -48,7 +48,9 @@ public:
 
     void drop(ContextPtr context) override;
 
-    void alterTable(ContextPtr local_context, const StorageID & table_id, const StorageInMemoryMetadata & metadata) override;
+    ASTPtr getAttachTableQuery(ContextPtr local_context, const StorageID & table_id) const override;
+
+    void alterTable(ContextPtr local_context, const StorageID & table_id, const StorageInMemoryMetadata & metadata, ASTPtr& ast) override;
 
     std::vector<std::pair<ASTPtr, StoragePtr>> getTablesForBackup(const FilterByNameFunction & filter, const ContextPtr & local_context) const override;
 

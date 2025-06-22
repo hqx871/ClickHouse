@@ -621,7 +621,7 @@ Strings DatabaseOrdinary::getAllTableNames(ContextPtr) const
     return {unique_names.begin(), unique_names.end()};
 }
 
-void DatabaseOrdinary::alterTable(ContextPtr local_context, const StorageID & table_id, const StorageInMemoryMetadata & metadata)
+ASTPtr DatabaseOrdinary::getAttachTableQuery(ContextPtr local_context, const StorageID & table_id) const
 {
     auto db_disk = getDisk();
     waitDatabaseStarted();
@@ -630,7 +630,6 @@ void DatabaseOrdinary::alterTable(ContextPtr local_context, const StorageID & ta
 
     /// Read the definition of the table and replace the necessary parts with new ones.
     String table_metadata_path = getObjectMetadataPath(table_name);
-    String table_metadata_tmp_path = table_metadata_path + ".tmp";
     String statement = readMetadataFile(db_disk, table_metadata_path);
 
     ParserCreateQuery parser;
@@ -642,6 +641,21 @@ void DatabaseOrdinary::alterTable(ContextPtr local_context, const StorageID & ta
         0,
         local_context->getSettingsRef()[Setting::max_parser_depth],
         local_context->getSettingsRef()[Setting::max_parser_backtracks]);
+    return ast;
+}
+
+
+void DatabaseOrdinary::alterTable(ContextPtr local_context, const StorageID & table_id, const StorageInMemoryMetadata & metadata, ASTPtr& ast)
+{
+    auto db_disk = getDisk();
+    waitDatabaseStarted();
+
+    String table_name = table_id.table_name;
+
+    /// Read the definition of the table and replace the necessary parts with new ones.
+    String table_metadata_path = getObjectMetadataPath(table_name);
+    String table_metadata_tmp_path = table_metadata_path + ".tmp";
+    String statement = readMetadataFile(db_disk, table_metadata_path);
 
     applyMetadataChangesToCreateQuery(ast, metadata, local_context);
 

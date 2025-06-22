@@ -28,7 +28,7 @@ public:
     bool supportsSubcolumns() const override { return true; }
     bool supportsDynamicSubcolumns() const override { return true; }
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context, ASTPtr& ast) const override;
 
     void read(
         QueryPlan & query_plan,

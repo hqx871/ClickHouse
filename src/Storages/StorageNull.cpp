@@ -36,7 +36,7 @@ void registerStorageNull(StorageFactory & factory)
     });
 }
 
-void StorageNull::checkAlterIsPossible(const AlterCommands & commands, ContextPtr context) const
+void StorageNull::checkAlterIsPossible(const AlterCommands & commands, ContextPtr context, ASTPtr& /*ast*/) const
 {
     std::optional<NameDependencies> name_deps{};
     for (const auto & command : commands)
@@ -66,13 +66,13 @@ void StorageNull::checkAlterIsPossible(const AlterCommands & commands, ContextPt
 }
 
 
-void StorageNull::alter(const AlterCommands & params, ContextPtr context, AlterLockHolder &)
+void StorageNull::alter(const AlterCommands & params, ContextPtr context, AlterLockHolder &, ASTPtr& ast)
 {
     auto table_id = getStorageID();
 
     StorageInMemoryMetadata new_metadata = getInMemoryMetadata();
-    params.apply(new_metadata, context);
-    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(context, table_id, new_metadata);
+    params.apply(new_metadata, ast, context);
+    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(context, table_id, new_metadata, ast);
     setInMemoryMetadata(new_metadata);
 }
 

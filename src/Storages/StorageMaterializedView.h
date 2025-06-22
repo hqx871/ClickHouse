@@ -55,11 +55,11 @@ public:
         bool cleanup,
         ContextPtr context) override;
 
-    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & table_lock_holder) override;
+    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & table_lock_holder, ASTPtr& ast) override;
 
     void checkMutationIsPossible(const MutationCommands & commands, const Settings & settings) const override;
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context, ASTPtr& ast) const override;
 
     Pipe alterPartition(const StorageMetadataPtr & metadata_snapshot, const PartitionCommands & commands, ContextPtr context) override;
 

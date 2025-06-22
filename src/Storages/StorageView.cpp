@@ -295,7 +295,7 @@ ASTPtr StorageView::restoreViewName(ASTSelectQuery & select_query, const ASTPtr 
     return subquery->children[0];
 }
 
-void StorageView::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* local_context */) const
+void StorageView::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* local_context */, ASTPtr&) const
 {
     for (const auto & command : commands)
     {

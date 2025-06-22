@@ -93,15 +93,15 @@ public:
         IStorage::renameInMemory(new_table_id);
     }
 
-    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & alter_lock_holder) override
+    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & alter_lock_holder, ASTPtr& ast) override
     {
-        getNested()->alter(params, context, alter_lock_holder);
+        getNested()->alter(params, context, alter_lock_holder, ast);
         IStorage::setInMemoryMetadata(getNested()->getInMemoryMetadata());
     }
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context) const override
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context, ASTPtr& ast) const override
     {
-        getNested()->checkAlterIsPossible(commands, context);
+        getNested()->checkAlterIsPossible(commands, context, ast);
     }
 
     Pipe alterPartition(

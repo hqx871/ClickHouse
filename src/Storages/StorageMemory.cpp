@@ -314,11 +314,11 @@ void StorageMemory::truncate(
     total_size_rows.store(0, std::memory_order_relaxed);
 }
 
-void StorageMemory::alter(const DB::AlterCommands & params, DB::ContextPtr context, DB::IStorage::AlterLockHolder & /*alter_lock_holder*/)
+void StorageMemory::alter(const DB::AlterCommands & params, DB::ContextPtr context, DB::IStorage::AlterLockHolder & /*alter_lock_holder*/, ASTPtr& ast)
 {
     auto table_id = getStorageID();
     StorageInMemoryMetadata new_metadata = getInMemoryMetadata();
-    params.apply(new_metadata, context);
+    params.apply(new_metadata, ast, context);
 
     if (params.isSettingsAlter())
     {
@@ -363,7 +363,7 @@ void StorageMemory::alter(const DB::AlterCommands & params, DB::ContextPtr conte
         *memory_settings = std::move(changed_settings);
     }
 
-    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(context, table_id, new_metadata);
+    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(context, table_id, new_metadata, ast);
     setInMemoryMetadata(new_metadata);
 }
 
@@ -601,7 +601,7 @@ void StorageMemory::restoreDataImpl(const BackupPtr & backup, const String & dat
     total_size_rows += new_rows;
 }
 
-void StorageMemory::checkAlterIsPossible(const AlterCommands & commands, ContextPtr) const
+void StorageMemory::checkAlterIsPossible(const AlterCommands & commands, ContextPtr, ASTPtr&) const
 {
     for (const auto & command : commands)
     {

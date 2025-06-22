@@ -468,13 +468,14 @@ bool StorageWindowView::optimize(
 void StorageWindowView::alter(
     const AlterCommands & params,
     ContextPtr local_context,
-    AlterLockHolder &)
+    AlterLockHolder &,
+    ASTPtr& ast)
 {
     throwIfWindowViewIsDisabled(local_context);
     auto table_id = getStorageID();
     StorageInMemoryMetadata new_metadata = getInMemoryMetadata();
     StorageInMemoryMetadata old_metadata = getInMemoryMetadata();
-    params.apply(new_metadata, local_context);
+    params.apply(new_metadata, ast, local_context);
 
     const auto & new_select = new_metadata.select;
     const auto & new_select_query = new_metadata.select.inner_query;
@@ -522,13 +523,13 @@ void StorageWindowView::alter(
         new_metadata.columns = target_table_metadata->columns;
     }
 
-    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata);
+    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata, ast);
     setInMemoryMetadata(new_metadata);
 
     startup();
 }
 
-void StorageWindowView::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context) const
+void StorageWindowView::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context, ASTPtr&) const
 {
     throwIfWindowViewIsDisabled(local_context);
     for (const auto & command : commands)

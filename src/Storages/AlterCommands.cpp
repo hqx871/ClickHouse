@@ -494,7 +494,7 @@ std::optional<AlterCommand> AlterCommand::parse(const ASTAlterCommand * command_
 }
 
 
-void AlterCommand::apply(StorageInMemoryMetadata & metadata, ContextPtr context) const
+void AlterCommand::apply(StorageInMemoryMetadata & metadata, ASTPtr& attach_query, ContextPtr context) const
 {
     if (type == ADD_COLUMN)
     {
@@ -992,6 +992,14 @@ void AlterCommand::apply(StorageInMemoryMetadata & metadata, ContextPtr context)
             else
                 rename_visitor.visit(index.definition_ast);
         }
+        auto * storage = attach_query->as<ASTCreateQuery>()->storage;
+        if (storage->engine != nullptr)
+        {
+            for (auto & column : storage->engine->children)
+            {
+                rename_visitor.visit(column);
+            }
+        }
     }
     else if (type == MODIFY_SQL_SECURITY)
         metadata.setSQLSecurity(sql_security->as<ASTSQLSecurity &>());
@@ -1159,7 +1167,7 @@ bool AlterCommand::isDropSomething() const
         || type == Type::DROP_CONSTRAINT || type == Type::DROP_PROJECTION;
 }
 
-std::optional<MutationCommand> AlterCommand::tryConvertToMutationCommand(StorageInMemoryMetadata & metadata, ContextPtr context) const
+std::optional<MutationCommand> AlterCommand::tryConvertToMutationCommand(StorageInMemoryMetadata & metadata, ASTPtr& attach_query, ContextPtr context) const
 {
     if (!isRequireMutationStage(metadata))
         return {};
@@ -1225,7 +1233,7 @@ std::optional<MutationCommand> AlterCommand::tryConvertToMutationCommand(Storage
     }
 
     result.ast = ast->clone();
-    apply(metadata, context);
+    apply(metadata, attach_query, context);
     return result;
 }
 
@@ -1279,7 +1287,7 @@ bool AlterCommands::hasVectorSimilarityIndex(const StorageInMemoryMetadata & met
     return false;
 }
 
-void AlterCommands::apply(StorageInMemoryMetadata & metadata, ContextPtr context) const
+void AlterCommands::apply(StorageInMemoryMetadata & metadata, ASTPtr& attach_query, ContextPtr context) const
 {
     if (!prepared)
         throw DB::Exception(ErrorCodes::LOGICAL_ERROR, "Alter commands is not prepared. Cannot apply. It's a bug");
@@ -1288,7 +1296,7 @@ void AlterCommands::apply(StorageInMemoryMetadata & metadata, ContextPtr context
 
     for (const AlterCommand & command : *this)
         if (!command.ignore)
-            command.apply(metadata_copy, context);
+            command.apply(metadata_copy, attach_query, context);
 
     /// Changes in columns may lead to changes in keys expression.
     metadata_copy.sorting_key.recalculateWithNewAST(metadata_copy.sorting_key.definition_ast, metadata_copy.columns, context);
@@ -1820,12 +1828,12 @@ static MutationCommand createMaterializeTTLCommand()
     return command;
 }
 
-MutationCommands AlterCommands::getMutationCommands(StorageInMemoryMetadata metadata, bool materialize_ttl, ContextPtr context, bool with_alters) const
+MutationCommands AlterCommands::getMutationCommands(StorageInMemoryMetadata metadata, ASTPtr& attach_query, bool materialize_ttl, ContextPtr context, bool with_alters) const
 {
     MutationCommands result;
     for (const auto & alter_cmd : *this)
     {
-        if (auto mutation_cmd = alter_cmd.tryConvertToMutationCommand(metadata, context); mutation_cmd)
+        if (auto mutation_cmd = alter_cmd.tryConvertToMutationCommand(metadata, attach_query, context); mutation_cmd)
         {
             result.push_back(*mutation_cmd);
         }

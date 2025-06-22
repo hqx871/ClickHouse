@@ -65,7 +65,7 @@ public:
     void checkMutationIsPossible(const MutationCommands & commands, const Settings & settings) const override;
     void mutate(const MutationCommands &, ContextPtr) override;
     void drop() override;
-    void alter(const AlterCommands & params, ContextPtr query_context, AlterLockHolder &) override;
+    void alter(const AlterCommands & params, ContextPtr query_context, AlterLockHolder &, ASTPtr& ast) override;
 
     bool optimize(
         const ASTPtr & query,
@@ -106,7 +106,7 @@ public:
 
     std::optional<UInt64> totalBytes(ContextPtr query_context) const override;
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */, ASTPtr& ast) const override;
 
     const RocksDBSettings & getSettings() const { return *storage_settings.get(); }
 

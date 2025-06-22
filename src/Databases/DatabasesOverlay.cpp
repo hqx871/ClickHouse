@@ -244,13 +244,13 @@ void DatabasesOverlay::drop(ContextPtr context_)
         db->drop(context_);
 }
 
-void DatabasesOverlay::alterTable(ContextPtr local_context, const StorageID & table_id, const StorageInMemoryMetadata & metadata)
+void DatabasesOverlay::alterTable(ContextPtr local_context, const StorageID & table_id, const StorageInMemoryMetadata & metadata, ASTPtr& ast)
 {
     for (auto & db : databases)
     {
         if (!db->isReadOnly() && db->isTableExist(table_id.table_name, local_context))
         {
-            db->alterTable(local_context, table_id, metadata);
+            db->alterTable(local_context, table_id, metadata, ast);
             return;
         }
     }

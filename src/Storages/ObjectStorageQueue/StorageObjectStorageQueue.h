@@ -49,12 +49,13 @@ public:
         size_t max_block_size,
         size_t num_streams) override;
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context, ASTPtr& ast) const override;
 
     void alter(
         const AlterCommands & commands,
         ContextPtr local_context,
-        AlterLockHolder & table_lock_holder) override;
+        AlterLockHolder & table_lock_holder,
+        ASTPtr& ast) override;
 
     const auto & getFormatName() const { return configuration->format; }
 

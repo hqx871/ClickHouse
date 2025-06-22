@@ -55,9 +55,9 @@ public:
         return std::make_shared<NullSinkToStorage>(metadata_snapshot->getSampleBlock());
     }
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr context, ASTPtr& ast) const override;
 
-    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & table_lock_holder) override;
+    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & table_lock_holder, ASTPtr& ast) override;
 
     std::optional<UInt64> totalRows(ContextPtr) const override
     {

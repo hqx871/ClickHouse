@@ -71,10 +71,13 @@ public:
 
     Strings getAllTableNames(ContextPtr context) const override;
 
+    ASTPtr getAttachTableQuery(ContextPtr local_context, const StorageID & table_id) const override;
+
     void alterTable(
         ContextPtr context,
         const StorageID & table_id,
-        const StorageInMemoryMetadata & metadata) override;
+        const StorageInMemoryMetadata & metadata,
+        ASTPtr& ast) override;
 
     Strings getNamesOfPermanentlyDetachedTables() const override
     {

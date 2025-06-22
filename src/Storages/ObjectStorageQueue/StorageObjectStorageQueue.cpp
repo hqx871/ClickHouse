@@ -815,7 +815,7 @@ static AlterCommands normalizeAlterCommands(const AlterCommands & alter_commands
     return normalized_alter_commands;
 }
 
-void StorageObjectStorageQueue::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context) const
+void StorageObjectStorageQueue::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context, ASTPtr& ast) const
 {
     for (const auto & command : commands)
     {
@@ -839,7 +839,7 @@ void StorageObjectStorageQueue::checkAlterIsPossible(const AlterCommands & comma
     StorageInMemoryMetadata new_metadata(old_metadata);
 
     auto alter_commands = normalizeAlterCommands(commands);
-    alter_commands.apply(new_metadata, local_context);
+    alter_commands.apply(new_metadata, ast, local_context);
 
     if (!new_metadata.hasSettingsChanges())
         throw Exception(ErrorCodes::LOGICAL_ERROR, "No settings changes");
@@ -892,7 +892,8 @@ void StorageObjectStorageQueue::checkAlterIsPossible(const AlterCommands & comma
 void StorageObjectStorageQueue::alter(
     const AlterCommands & commands,
     ContextPtr local_context,
-    AlterLockHolder &)
+    AlterLockHolder &,
+    ASTPtr& ast)
 {
     if (commands.isSettingsAlter())
     {
@@ -910,7 +911,7 @@ void StorageObjectStorageQueue::alter(
 
         /// settings_changes will be cloned.
         StorageInMemoryMetadata new_metadata(old_metadata);
-        alter_commands.apply(new_metadata, local_context);
+        alter_commands.apply(new_metadata, ast, local_context);
         auto & new_settings = new_metadata.settings_changes->as<ASTSetQuery &>().changes;
 
         if (old_settings)
@@ -1029,7 +1030,7 @@ void StorageObjectStorageQueue::alter(
                 enable_hash_ring_filtering = change.value.safeGet<bool>();
         }
 
-        DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata);
+        DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata, ast);
         setInMemoryMetadata(new_metadata);
     }
 }

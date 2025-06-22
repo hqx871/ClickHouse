@@ -1021,7 +1021,7 @@ std::optional<UInt64> StorageHive::totalRowsByPartitionPredicate(const ActionsDA
     return totalRowsImpl(context_->getSettingsRef(), &filter_actions_dag, context_, PruneLevel::Partition);
 }
 
-void StorageHive::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /*local_context*/) const
+void StorageHive::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /*local_context*/, ASTPtr& /*ast*/) const
 {
     for (const auto & command : commands)
     {

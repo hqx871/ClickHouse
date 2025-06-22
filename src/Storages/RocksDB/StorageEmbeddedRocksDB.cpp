@@ -851,9 +851,10 @@ std::optional<UInt64> StorageEmbeddedRocksDB::totalBytes(ContextPtr) const
 void StorageEmbeddedRocksDB::alter(
     const AlterCommands & params,
     ContextPtr query_context,
-    AlterLockHolder & holder)
+    AlterLockHolder & holder,
+    ASTPtr& ast)
 {
-    IStorage::alter(params, query_context, holder);
+    IStorage::alter(params, query_context, holder, ast);
     auto new_metadata = getInMemoryMetadataPtr();
     if (new_metadata->settings_changes)
     {
@@ -877,7 +878,7 @@ void registerStorageEmbeddedRocksDB(StorageFactory & factory)
     factory.registerStorage("EmbeddedRocksDB", create, features);
 }
 
-void StorageEmbeddedRocksDB::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */) const
+void StorageEmbeddedRocksDB::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */, ASTPtr&) const
 {
     for (const auto & command : commands)
         if (!command.isCommentAlter() && !command.isSettingsAlter())

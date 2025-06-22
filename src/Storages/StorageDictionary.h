@@ -88,9 +88,9 @@ public:
 
     void renameInMemory(const StorageID & new_table_id) override;
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr /* context */, ASTPtr& ast) const override;
 
-    void alter(const AlterCommands & params, ContextPtr alter_context, AlterLockHolder &) override;
+    void alter(const AlterCommands & params, ContextPtr alter_context, AlterLockHolder &, ASTPtr& ast) override;
 
     LoadablesConfigurationPtr getConfiguration() const;
 

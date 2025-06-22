@@ -372,7 +372,7 @@ bool StorageTimeSeries::optimize(
 }
 
 
-void StorageTimeSeries::checkAlterIsPossible(const AlterCommands & commands, ContextPtr) const
+void StorageTimeSeries::checkAlterIsPossible(const AlterCommands & commands, ContextPtr, ASTPtr&) const
 {
     for (const auto & command : commands)
     {
@@ -381,9 +381,9 @@ void StorageTimeSeries::checkAlterIsPossible(const AlterCommands & commands, Con
     }
 }
 
-void StorageTimeSeries::alter(const AlterCommands & params, ContextPtr local_context, AlterLockHolder & table_lock_holder)
+void StorageTimeSeries::alter(const AlterCommands & params, ContextPtr local_context, AlterLockHolder & table_lock_holder, ASTPtr& ast)
 {
-    IStorage::alter(params, local_context, table_lock_holder);
+    IStorage::alter(params, local_context, table_lock_holder, ast);
 }
 
 

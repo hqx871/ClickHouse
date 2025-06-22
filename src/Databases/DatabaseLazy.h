@@ -52,7 +52,8 @@ public:
     void alterTable(
         ContextPtr context,
         const StorageID & table_id,
-        const StorageInMemoryMetadata & metadata) override;
+        const StorageInMemoryMetadata & metadata,
+        ASTPtr& ast) override;
 
     time_t getObjectMetadataModificationTime(const String & table_name) const override;
 

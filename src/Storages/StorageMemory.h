@@ -84,8 +84,8 @@ public:
     void backupData(BackupEntriesCollector & backup_entries_collector, const String & data_path_in_backup, const std::optional<ASTs> & partitions) override;
     void restoreDataFromBackup(RestorerFromBackup & restorer, const String & data_path_in_backup, const std::optional<ASTs> & partitions) override;
 
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context) const override;
-    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & alter_lock_holder) override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context, ASTPtr& ast) const override;
+    void alter(const AlterCommands & params, ContextPtr context, AlterLockHolder & alter_lock_holder, ASTPtr& ast) override;
 
     std::optional<UInt64> totalRows(ContextPtr) const override;
     std::optional<UInt64> totalBytes(ContextPtr) const override;

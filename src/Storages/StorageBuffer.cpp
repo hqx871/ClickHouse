@@ -1146,7 +1146,7 @@ void StorageBuffer::reschedule()
     flush_handle->scheduleAfter(std::min({min, max, flush}) * 1000);
 }
 
-void StorageBuffer::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context) const
+void StorageBuffer::checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context, ASTPtr&) const
 {
     std::optional<NameDependencies> name_deps{};
     for (const auto & command : commands)
@@ -1186,19 +1186,19 @@ std::optional<UInt64> StorageBuffer::totalBytes(ContextPtr) const
     return total_writes.bytes;
 }
 
-void StorageBuffer::alter(const AlterCommands & params, ContextPtr local_context, AlterLockHolder &)
+void StorageBuffer::alter(const AlterCommands & params, ContextPtr local_context, AlterLockHolder &, ASTPtr& ast)
 {
     auto table_id = getStorageID();
-    checkAlterIsPossible(params, local_context);
+    checkAlterIsPossible(params, local_context, ast);
     auto metadata_snapshot = getInMemoryMetadataPtr();
 
     /// Flush buffers to the storage because BufferSource skips buffers with old metadata_version.
     optimize({} /*query*/, metadata_snapshot, {} /*partition_id*/, false /*final*/, false /*deduplicate*/, {}, false /*cleanup*/, local_context);
 
     StorageInMemoryMetadata new_metadata = *metadata_snapshot;
-    params.apply(new_metadata, local_context);
+    params.apply(new_metadata, ast, local_context);
     new_metadata.metadata_version += 1;
-    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata);
+    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata, ast);
     setInMemoryMetadata(new_metadata);
 }
 

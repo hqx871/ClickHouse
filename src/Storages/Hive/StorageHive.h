@@ -57,7 +57,7 @@ public:
     bool supportsSubsetOfColumns() const;
 
     std::optional<UInt64> totalRowsByPartitionPredicate(const ActionsDAG & filter_actions_dag, ContextPtr context_) const override;
-    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context) const override;
+    void checkAlterIsPossible(const AlterCommands & commands, ContextPtr local_context, ASTPtr& ast) const override;
 
 protected:
     friend class ReadFromHive;

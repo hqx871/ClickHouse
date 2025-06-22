@@ -642,12 +642,13 @@ void StorageMaterializedView::dropTempTable(StorageID table_id, ContextMutablePt
 void StorageMaterializedView::alter(
     const AlterCommands & params,
     ContextPtr local_context,
-    AlterLockHolder &)
+    AlterLockHolder &,
+    ASTPtr& ast)
 {
     auto table_id = getStorageID();
     StorageInMemoryMetadata new_metadata = getInMemoryMetadata();
     StorageInMemoryMetadata old_metadata = getInMemoryMetadata();
-    params.apply(new_metadata, local_context);
+    params.apply(new_metadata, ast, local_context);
 
     const auto & new_select = new_metadata.select;
     new_metadata.setSelectQuery(new_select);
@@ -668,7 +669,7 @@ void StorageMaterializedView::alter(
         checkAllTypesAreAllowedInTable(new_metadata.getColumns().getAll());
     }
 
-    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata);
+    DatabaseCatalog::instance().getDatabase(table_id.database_name)->alterTable(local_context, table_id, new_metadata, ast);
     setInMemoryMetadata(new_metadata);
 
     if (refresher)
@@ -676,7 +677,7 @@ void StorageMaterializedView::alter(
 }
 
 
-void StorageMaterializedView::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /*local_context*/) const
+void StorageMaterializedView::checkAlterIsPossible(const AlterCommands & commands, ContextPtr /*local_context*/, ASTPtr&) const
 {
     for (const auto & command : commands)
     {
