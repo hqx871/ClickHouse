@@ -72,6 +72,7 @@ void VerticalRowOutputFormat::writeField(const IColumn & column, const ISerializ
 
 void VerticalRowOutputFormat::writeValue(const IColumn & column, const ISerialization & serialization, size_t row_num) const
 {
+    auto indent = 0;
     /// If we need highlighting.
     if (color
         && ((format_settings.pretty.highlight_digit_groups && is_number[field_number])
@@ -80,7 +81,7 @@ void VerticalRowOutputFormat::writeValue(const IColumn & column, const ISerializ
         String serialized_value;
         {
             WriteBufferFromString buf(serialized_value);
-            serialization.serializeText(column, row_num, buf, format_settings);
+            serialization.serializeTextPretty(column, row_num, buf, format_settings, indent);
         }
 
         /// Highlight groups of thousands.
@@ -95,7 +96,7 @@ void VerticalRowOutputFormat::writeValue(const IColumn & column, const ISerializ
     }
     else
     {
-        serialization.serializeText(column, row_num, out, format_settings);
+        serialization.serializeTextPretty(column, row_num, out, format_settings, indent);
     }
 
     /// Write a tip.

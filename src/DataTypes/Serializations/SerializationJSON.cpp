@@ -310,6 +310,12 @@ void SerializationJSON<Parser>::serializeText(const IColumn & column, size_t row
 }
 
 template <typename Parser>
+void SerializationJSON<Parser>::serializeTextPretty(const IColumn & column, size_t row_num, WriteBuffer & ostr, const FormatSettings & settings, size_t indent) const
+{
+    serializeTextImpl(column, row_num, ostr, settings, true, indent);
+}
+
+template <typename Parser>
 void SerializationJSON<Parser>::deserializeWholeText(IColumn & column, ReadBuffer & istr, const FormatSettings & settings) const
 {
     String object;

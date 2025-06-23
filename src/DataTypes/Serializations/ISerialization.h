@@ -450,6 +450,10 @@ public:
       * Without escaping or quoting.
       */
     virtual void serializeText(const IColumn & column, size_t row_num, WriteBuffer & ostr, const FormatSettings &) const = 0;
+    virtual void serializeTextPretty(const IColumn & column, size_t row_num, WriteBuffer & ostr, const FormatSettings & format_settings, size_t /*indent*/) const
+    {
+        serializeText(column, row_num, ostr, format_settings);
+    }
 
     /** Text deserialization in case when buffer contains only one value, without any escaping and delimiters.
       */
